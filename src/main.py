@@ -7,7 +7,8 @@ from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
-from models import db
+from models import db, User, Task
+from passlib.hash import pbkdf2_sha256 as sha256
 #from models import Person
 
 app = Flask(__name__)
@@ -37,9 +38,55 @@ def handle_hello():
 
     return jsonify(response_body), 200
 @app.route('/register', methods=['POST'])
-def method_name():
-    data = request.get_json()
-    print(data)
+def register():
+        if request.method == 'POST':
+            data = request.get_json()
+            new_user = None
+            new_user = User(
+                username=data["username"],
+                password=sha256.hash(data["password"]),
+                mail=data["mail"],
+                name = data["name"],
+                lastname = data["lastname"],
+                rut = data["rut"]
+            )
+            print(new_user.serialize())
+            db.session.add(new_user)
+            db.session.commit()
+            if new_user:
+                return jsonify({
+                    "papu": "inserto"
+                }), 200
+            else:
+                return jsonify(#{
+                    #"status": "la wea se rompio"
+                    data
+                #}
+                ), 400
+
+@app.route('/login', methods= ['POST'])
+def login():
+    if request.method == 'POST':
+        user = User()
+        data = request.json
+        user = User.query.filter_by(username=data["username"]).first()
+        if user is None:
+            return jsonify({
+            "error": "el usuario no existe"
+        }), 404
+        if sha256.verify(data["password"], user.password):
+
+            mivariable = create_access_token(identity=data["username"])
+            refresh = create_refresh_token(identity=data["username"])
+            return jsonify({
+                "token": mivariable,
+                "refresh": refresh,
+                "user": user.serialize()
+                }), 200
+
+        return jsonify({
+            "error": "la contraseña no es valida"
+            }), 400          
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
