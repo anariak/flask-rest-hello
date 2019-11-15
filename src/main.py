@@ -10,7 +10,6 @@ from utils import APIException, generate_sitemap
 from models import db, User, Task
 from passlib.hash import pbkdf2_sha256 as sha256
 from flask_jwt_extended import create_access_token, create_refresh_token, JWTManager, jwt_required
-
 #from models import Person
 
 app = Flask(__name__)
@@ -90,7 +89,30 @@ def login():
 
         return jsonify({
             "error": "la contraseña no es valida"
-            }), 400          
+            }), 400  
+@jwt_required        
+@app.route('/newtask', methods=['POST'])
+def hand_new_task():
+    if request.method == 'POST':
+        data = request.get_json()
+        new_task = Task(
+            title=data["title"],
+            date=data["date"],
+            location=data["location"],
+            description=data["description"],
+            payment=data["payment"]
+        )
+        db.session.add(new_task)
+        if new_task:
+            db.session.commit()
+            return jsonify({
+                "tarea":"insertada"
+            }), 200
+        else:
+            return jsonify({
+                "tarea": "no insertada"
+            }), 400
+    
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
