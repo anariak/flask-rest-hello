@@ -36,6 +36,10 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+@app.route('/register', methods=['POST'])
+def method_name():
+    data = request.get_json()
+    print(data)
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
