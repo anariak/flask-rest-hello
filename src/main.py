@@ -9,15 +9,19 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from models import db, User, Task
 from passlib.hash import pbkdf2_sha256 as sha256
+from flask_jwt_extended import create_access_token, create_refresh_token, JWTManager, jwt_required
+
 #from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'El_que_no_salta_es_paco'
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
+JWTManager(app)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
