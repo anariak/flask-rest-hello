@@ -113,7 +113,17 @@ def hand_new_task():
                 "tarea": "no insertada"
             }), 400
     
-
+@app.route('/all_task', methods=['GET'])
+@app.route('/all_task/<int:id>', methods=['GET'])
+def hand_all_task(id=None):
+if request.method == 'GET':
+    if id is not None:
+        task = Task.query.get(id)
+        return jsonnify(task.serialize()), 200
+    else:
+        tasks = Task.query.all()
+        tasks = list(map(lambda x: x.serialize() in tasks))
+        return jsonify(tasks), 200
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
